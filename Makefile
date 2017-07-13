@@ -1,0 +1,2 @@
+grunt:
+	grunt test

@@ -6,6 +6,7 @@ module.exports = function( grunt ) {
 	var buildFolder = 'build';
 
 	grunt.initConfig( {
+
 		pkg: pkg,
 		jshint: {
 			options: {
@@ -233,4 +234,5 @@ module.exports = function( grunt ) {
 		'clean', 'shell:updateRepo', 'shell:cloneDeploy', 'clean:deploy', 'create_build', 'shell:commitDeploy', 'configDeploy', 'shell:review'
 	] );
 	grunt.registerTask( 'default', 'test' );
+
 };

@@ -6,7 +6,7 @@ var CONFIG = ( function ( window, $ ) {
 		language: 'en',
 		api: {
 			sparql: {
-				uri: '/bigdata/namespace/wdq/sparql'
+				uri: 'https://query.wikidata.org/bigdata/namespace/wdq/sparql'
 			},
 			wikibase: {
 				uri: 'https://www.wikidata.org/w/api.php'
