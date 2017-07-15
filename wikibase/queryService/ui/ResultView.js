@@ -207,18 +207,17 @@ wikibase.queryService.ui.ResultView = ( function( $, window ) {
 	 * Render a given SPARQL query
 	 *
 	 * @param {String} query
-	 * @return {JQuery.Promise}
 	 */
 	SELF.prototype.draw = function( query ) {
 		var self = this,
 			deferred = $.Deferred();
 
-		sparqlVarnish.rewriteQuery(query, function(newquery){
+		sparqlVarnish.rewriteQuery( query, function( newquery ) {
 		query = newquery;
 		self._query = query;
 
 		self._actionBar.show( 'wdqs-action-query', '', 'info', 100 );
-		$( '#query-rewrite' ).html(query);
+		$( '#query-rewrite' ).html( query );
 
 		$( '#query-result' ).empty().hide();
 		$( '.query-total' ).hide();
@@ -234,9 +233,9 @@ wikibase.queryService.ui.ResultView = ( function( $, window ) {
 				deferred.reject( error );
 			} );
 
-		return deferred.promise();
+		return deferred.promise( );
 
-		});
+		} );
 	};
 
 	/**
