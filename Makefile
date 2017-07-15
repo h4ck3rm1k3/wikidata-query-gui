@@ -1,2 +1,5 @@
 grunt:
-	grunt test
+	grunt build
+
+http:
+	python -m SimpleHTTPServer

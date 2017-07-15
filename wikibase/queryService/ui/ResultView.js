@@ -187,11 +187,17 @@ wikibase.queryService.ui.ResultView = ( function( $, window ) {
 	 * @private
 	 */
 	SELF.prototype._initResultBrowserMenu = function() {
+
+	var $element2 = $( '<li><a class="rewrite-query" href="#rewrite"><span class="rewrite-query"></span></a></li>' );
+	$element2.appendTo( $( '#result-browser-menu' ) );
+
 		$.each( this._resultBrowsers, function( key, b ) {
+
 			var $element = $( '<li><a class="result-browser" href="#">' +
 					'<span class="' + b.icon.split( '-', 1 )[0] + ' ' + b.icon + '"></span>' + b.label +
 					'</a></li>' );
 			$element.appendTo( $( '#result-browser-menu' ) );
+
 			b.$element = $element;
 		} );
 	};
@@ -206,15 +212,18 @@ wikibase.queryService.ui.ResultView = ( function( $, window ) {
 		var self = this,
 			deferred = $.Deferred();
 
-		this._query = query;
+		sparql_varnish.rewrite_query(query, function(newquery){
+		query = newquery
+		self._query = query;
 
-		this._actionBar.show( 'wdqs-action-query', '', 'info', 100 );
+		self._actionBar.show( 'wdqs-action-query', '', 'info', 100 );
+		$( '#query-rewrite' ).html(query);
 
 		$( '#query-result' ).empty().hide();
 		$( '.query-total' ).hide();
 		$( '#query-error' ).hide();
 
-		this._sparqlApi.query( query )
+		self._sparqlApi.query( query )
 			.done( function () {
 				self._handleQueryResult();
 				deferred.resolve();
@@ -225,6 +234,8 @@ wikibase.queryService.ui.ResultView = ( function( $, window ) {
 			} );
 
 		return deferred.promise();
+
+		});
 	};
 
 	/**
