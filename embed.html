@@ -1,0 +1,167 @@
+<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes"><title>Wikidata Query Service</title><link rel="stylesheet" href="css/embed.style.min.d684f8af231bc5ccd432.css"><link rel="shortcut icon" href="//www.wikidata.org/static/favicon/testwikidata.ico"><script src="js/shim.min.e82702b2ab0ddd14f026.js"></script><script src="js/sparql.min.b032c95acc73d1412d0e.js"></script></head><style>body {
+	margin: 0;
+	padding: 0;
+	overflow-y: auto;
+}
+
+.logo {
+	position: absolute;
+	top: 0px;
+	height: 100%;
+	width: 100%;
+	background-size: 80% 80%;
+	background-image:
+		url(https://upload.wikimedia.org/wikipedia/commons/6/66/Wikidata-logo-en.svg);
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+#error {
+	display: none;
+}
+
+.progress {
+	height: 30px;;
+}
+
+.progress-bar {
+	width: 100%;
+	line-height: 30px;
+	font-size: 18px;
+}
+
+.link {
+	position: fixed;
+	bottom: 0px;
+	left: 0px;
+	padding: 0px 2px 0px 2px;
+	background-color: rgba(255, 255, 255, 0.8);
+	z-index: 401; /* one above .leaflet-pane */
+}
+
+.edit {
+	position: fixed;
+	bottom: 0.5em;
+	left: 0;
+	font-size: 2em;
+	z-index: 401; /* one above .leaflet-pane */
+	padding: 0.2em;
+	border-radius: 5px;
+	background-color: rgba(255,255,255,0.8);
+}
+.popover {
+	min-width: 300px;
+	white-space: nowrap;
+}</style><body><div id="progress"><div class="progress"><div class="progress-bar progress-bar-striped active">Loading</div></div><div class="logo"></div></div><div id="error" class="progress"><div class="progress-bar progress-bar-danger">Error</div></div><div id="query-result"></div><a class="link edit-link" target="_blank" title="Wikidata Query Service SPARQL"><small>Edit on query.Wikidata.org</small></a> <a href="#" class="edit edit-link" data-toggle="popover"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a><script src="js/embed.vendor.min.5a70be7dd87ed6dcf80a.js"></script><script src="js/embed.wdqs.min.82fda3505957a3e185cd.js"></script><script type="text/javascript">// TODO: Put this to config and consolidate with the one in app.js
+		var RESULT_BROWSER = {
+			Table: {
+				class: 'TableResultBrowser'
+			},
+			ImageGrid: {
+				class: 'ImageResultBrowser'
+			},
+			Map: {
+				class: 'CoordinateResultBrowser'
+			},
+			BubbleChart: {
+				class: 'BubbleChartResultBrowser'
+			},
+			LineChart: {
+				class: 'LineChartResultBrowser',
+			},
+			BarChart: {
+				class: 'BarChartResultBrowser',
+			},
+			ScatterChart: {
+				class: 'ScatterChartResultBrowser',
+			},
+			AreaChart: {
+				class: 'AreaChartResultBrowser',
+			},
+			TreeMap: {
+				class: 'TreeMapResultBrowser'
+			},
+			Tree: {
+				class: 'TreeResultBrowser'
+			},
+			Timeline: {
+				class: 'TimelineResultBrowser'
+			},
+			Dimensions: {
+				class: 'MultiDimensionResultBrowser'
+			},
+			Graph: {
+				class: 'GraphResultBrowser'
+			}
+		};
+
+		$( document ).ready( function() {
+			function getResultBrowser( query ) {
+				var browser = null;
+				var browserPackage = wikibase.queryService.ui.resultBrowser;
+
+				try {
+					var browserKey = query.match( /#defaultView:(\w+)/ )[1];
+					var browserClass = RESULT_BROWSER[browserKey].class;
+					browser = new browserPackage[browserClass]();
+				} catch ( e ) {
+					var browserClass = RESULT_BROWSER.Table.class;
+					browser = new browserPackage[browserClass]();
+				}
+
+				var tracking = new wikibase.queryService.api.Tracking();
+				tracking.track( 'wikibase.queryService.ui.embed.' + ( browserKey || 'default' ) );
+				return browser;
+			}
+
+			function renderEdit( query, callback ) {
+				var ve = new wikibase.queryService.ui.queryHelper.QueryHelper();
+				ve.setChangeListener( _.debounce( function( v ) {
+					callback( v.getQuery() );
+				}, 1500 ) );
+
+				var $editor = $( '<div>' );
+				ve.setQuery( query );
+				ve.draw( $editor );
+				$('.edit').on('click',function(e){
+				    e.preventDefault();
+				  }).popover( {
+						placement: 'top',
+						'html': true,
+						'content': $editor
+					} );
+				if ( /^#TEMPLATE=/m.test( query ) ) {
+					// expand query template popover after allowing some time for labels to load
+					setTimeout( function() { $( '.edit' ).click(); }, 500 );
+				}
+			}
+
+			function renderQuery( query ) {
+				$( '.edit-link' ).attr( 'href', 'https://query.wikidata.org/' + window.location.hash )
+				window.location.hash = '#' + encodeURIComponent( query )
+
+				var browser = getResultBrowser( query );
+				var api = new wikibase.queryService.api.Sparql();
+				$( '#query-result' ).hide();
+				$( '#query-result' ).empty();
+				$( '#progress' ).show();
+				api.query( query ).done( function() {
+					try {
+						browser.setResult( api.getResultRawData() );
+						$( '#query-result' ).show();
+						browser.draw( $( '#query-result' ) );
+						$( '#progress' ).hide();
+					} catch ( e ) {
+						$( '#progress' ).hide();
+						$( '#error' ).show();
+					}
+				} ).fail( function() {
+					$( '#progress' ).hide();
+					$( '#error' ).show();
+				} );
+			}
+
+			var query = decodeURIComponent( window.location.hash.substr( 1 ) );
+			renderQuery( query );
+			renderEdit( query, renderQuery );
+		} );</script></body></html>
