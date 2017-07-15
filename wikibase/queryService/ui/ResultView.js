@@ -1,4 +1,5 @@
 var wikibase = wikibase || {};
+var sparqlVarnish = sparqlVarnish || {};
 wikibase.queryService = wikibase.queryService || {};
 wikibase.queryService.ui = wikibase.queryService.ui || {};
 
@@ -212,8 +213,8 @@ wikibase.queryService.ui.ResultView = ( function( $, window ) {
 		var self = this,
 			deferred = $.Deferred();
 
-		sparql_varnish.rewrite_query(query, function(newquery){
-		query = newquery
+		sparqlVarnish.rewriteQuery(query, function(newquery){
+		query = newquery;
 		self._query = query;
 
 		self._actionBar.show( 'wdqs-action-query', '', 'info', 100 );
