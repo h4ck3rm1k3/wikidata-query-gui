@@ -1,3 +1,12 @@
+# Wikidata Varnish query 
+
+Online here :
+https://h4ck3rm1k3.github.io/wikidata-query-gui
+
+Uses a simple rewrite tool to replace ugly wikidata predicates with user defined names.
+https://github.com/h4ck3rm1k3/wikidata-sparql-varnish-brush
+
+
 # Wikibase Query Service GUI
 
 This repository contains the GUI for the [Wikidata Query Service](https://query.wikidata.org/).
